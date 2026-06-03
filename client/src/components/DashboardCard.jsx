@@ -6,15 +6,18 @@ function DashboardCard({ title, value, icon, growth = "+2" }) {
         {icon}
       </div>
 
+
       {/* Value */}
       <h2 className="text-4xl sm:text-5xl font-bold text-black mb-2">
         {value}
       </h2>
 
+
       {/* Title */}
       <p className="text-zinc-600 font-medium mb-4 text-sm sm:text-base">
         {title}
       </p>
+
 
       {/* Growth Indicator */}
       <div className="flex items-center gap-2">

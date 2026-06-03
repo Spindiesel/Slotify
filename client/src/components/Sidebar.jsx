@@ -36,6 +36,10 @@ function Sidebar({ open, setOpen }) {
             <span className="text-black">Slot</span>
             <span className="text-[#FF0436]">ify</span>
           </h1>
+
+          <Link to="/rooms" className="block px-4 py-3 rounded-2xl font-semibold text-zinc-700 hover:bg-pink-50 hover:text-[#FF0436] transition-all">
+             Rooms
+          </Link>
           <button
             onClick={() => setOpen(false)}
             className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
@@ -69,6 +73,7 @@ function Sidebar({ open, setOpen }) {
             </Link>
           ))}
         </nav>
+        
 
         {/* Footer */}
         <div className="pt-6 border-t border-gray-200 flex-shrink-0">

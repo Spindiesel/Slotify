@@ -29,7 +29,7 @@ function Faculty() {
  const deleteFaculty = (id) => {
 
   const confirmDelete = window.confirm(
-    "Are you sure you want to delete this faculty member?"
+    "Are you sure you want to delete this faculty member from the pool?"
   );
 
   if (!confirmDelete) return;

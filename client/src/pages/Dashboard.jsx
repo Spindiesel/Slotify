@@ -63,7 +63,7 @@ function Dashboard() {
           <DashboardCard
             title="Total Subjects"
             value="24"
-            icon="📚"
+            icon=" 📚"
             growth="+4"
           />
           <DashboardCard
