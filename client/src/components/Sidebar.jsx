@@ -72,7 +72,7 @@ function Sidebar({ open, setOpen }) {
 
         {/* Footer */}
         <div className="pt-6 border-t border-gray-200 flex-shrink-0">
-          <p className="text-xs text-zinc-500">© 2024 Slotify. All rights reserved.</p>
+          <p className="text-xs text-zinc-500">App In Development Not Deployed</p>
         </div>
       </aside>
     </>

@@ -40,17 +40,15 @@ function Dashboard() {
   ];
 
   return (
-    <div className="w-full h-full flex flex-col">
-      {/* Main Content */}
-      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden">
-        <div className="p-4 sm:p-6 lg:p-10 w-full">
+    <div className="w-full overflow-auto">
+      <div className="p-4 sm:p-6 lg:p-10 w-full">
         {/* Welcome Section */}
         <div className="mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black mb-2 sm:mb-3">
             Welcome back, Admin! 👋
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-zinc-600 font-medium">
-            Manage faculty, subjects, rooms and generate timetables effortlessly.
+            Here's what's happening with your institution today.
           </p>
         </div>
 
@@ -149,7 +147,6 @@ function Dashboard() {
               Start Generating
             </button>
           </div>
-        </div>
         </div>
       </div>
     </div>

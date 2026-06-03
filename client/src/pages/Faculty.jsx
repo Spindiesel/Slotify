@@ -33,41 +33,43 @@ function Faculty() {
   };
 
   return (
-    <div className="flex-1 bg-gray-50 p-8">
+    <div className="w-full overflow-auto">
+      <div className="p-4 sm:p-6 lg:p-8 w-full">
 
-      <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
 
-        <div>
-          <h1 className="text-4xl font-bold text-black">
-            Faculty Management
-          </h1>
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-black">
+              Faculty Management
+            </h1>
 
-          <p className="text-gray-600 mt-2">
-            Manage all faculty members.
-          </p>
+            <p className="text-zinc-600 mt-2 text-sm sm:text-base">
+              Manage all faculty members.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-5 py-3 rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] text-white font-medium whitespace-nowrap"
+          >
+            + Add Faculty
+          </button>
+
         </div>
 
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-5 py-3 rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] text-white font-medium"
-        >
-          + Add Faculty
-        </button>
+        <FacultyTable
+          faculty={faculty}
+          onDelete={deleteFaculty}
+        />
+
+        {showModal && (
+          <AddFacultyModal
+            onClose={() => setShowModal(false)}
+            onAdd={addFaculty}
+          />
+        )}
 
       </div>
-
-      <FacultyTable
-        faculty={faculty}
-        onDelete={deleteFaculty}
-      />
-
-      {showModal && (
-        <AddFacultyModal
-          onClose={() => setShowModal(false)}
-          onAdd={addFaculty}
-        />
-      )}
-
     </div>
   );
 }
