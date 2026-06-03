@@ -26,11 +26,18 @@ function Faculty() {
     setFaculty([...faculty, newFaculty]);
   };
 
-  const deleteFaculty = (id) => {
-    setFaculty(
-      faculty.filter((item) => item.id !== id)
-    );
-  };
+ const deleteFaculty = (id) => {
+
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this faculty member?"
+  );
+
+  if (!confirmDelete) return;
+
+  setFaculty(
+    faculty.filter((item) => item.id !== id)
+  );
+};
 
   return (
     <div className="w-full overflow-auto">

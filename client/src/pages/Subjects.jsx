@@ -20,6 +20,13 @@ function Subjects() {
       hoursPerWeek: 3,
       faculty: "Dr Sharma",
     },
+    {
+        if:3,
+        name:"Computer Networks",
+        hoursPerWeek:3,
+        faculty:"Subhash",
+
+    },
   ]);
 
   const addSubject = (newSubject) => {
@@ -27,10 +34,17 @@ function Subjects() {
   };
 
   const deleteSubject = (id) => {
-    setSubjects(
-      subjects.filter((subject) => subject.id !== id)
-    );
-  };
+
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this subject?"
+  );
+
+  if (!confirmDelete) return;
+
+  setSubjects(
+    subjects.filter((subject) => subject.id !== id)
+  );
+};
 
   return (
     <div className="flex-1 bg-gray-50 p-8">
