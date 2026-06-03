@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Faculty from "./pages/Faculty";
 import Subjects from "./pages/Subjects";
 import Rooms from "./pages/Rooms";
+import TimetableGenerator from "./pages/TimetableGenerator";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -24,6 +25,7 @@ function App() {
               <Route path="/faculty" element={<Faculty />} />
               <Route path="/subjects" element={<Subjects />} />
               <Route path="/rooms" element={<Rooms />} />
+              <Route path="/timetables" element={<TimetableGenerator />} />
             </Routes>
           </main>
         </div>
