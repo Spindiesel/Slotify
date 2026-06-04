@@ -25,7 +25,10 @@ function generateSchedule(
   const subjectPool = [];
   subjects.forEach((subject) => {
     for (let i = 0; i < subject.hoursPerWeek; i++) {
-      subjectPool.push(subject.name);
+      subjectPool.push({
+        subject: subject.name,
+        faculty: subject.faculty,
+      });
     }
   });
 
@@ -69,18 +72,22 @@ function TimetableGenerator() {
   const subjects = [
     {
       name: "DBMS",
+      faculty: "Dr Rao",
       hoursPerWeek: 4,
     },
     {
       name: "Operating Systems",
+      faculty: "Dr Sharma",
       hoursPerWeek: 3,
     },
     {
       name: "Computer Networks",
+      faculty: "Dr Patel",
       hoursPerWeek: 3,
     },
     {
       name: "Java",
+      faculty: "Dr Kumar",
       hoursPerWeek: 4,
     },
   ];
@@ -103,6 +110,12 @@ function TimetableGenerator() {
   const [selectedSlot, setSelectedSlot] =
   useState(null);
 
+  const [versions, setVersions] =
+  useState([]);
+
+const [currentVersion, setCurrentVersion] =
+  useState(null);
+
   const [allowFreePeriods, setAllowFreePeriods] =
     useState(true);
 
@@ -111,17 +124,45 @@ function TimetableGenerator() {
 
   const [swapMode, setSwapMode] = useState(false);
 
-  const handleGenerate = () => {
-    const result = generateSchedule(
-  subjects,
-  workingDays,
-  periodsPerDay,
-  allowFreePeriods,
-  freePeriodDistribution
-);
+  const [conflictMessage, setConflictMessage] = useState("");
 
-    setGeneratedTimetable(result);
+  const checkFacultyConflict = (facultyName, dayIndex, periodIndex) => {
+    const slotsInPeriod = generatedTimetable[Object.keys(generatedTimetable)[dayIndex]];
+    if (!slotsInPeriod) return false;
+    
+    const slot = slotsInPeriod[periodIndex];
+    if (slot && slot.faculty === facultyName) {
+      return true;
+    }
+    
+    return false;
   };
+
+  const handleGenerate = () => {
+
+  const result = generateSchedule(
+    subjects,
+    workingDays,
+    periodsPerDay,
+    allowFreePeriods,
+    freePeriodDistribution
+  );
+
+  setGeneratedTimetable(result);
+
+  const newVersion = {
+    id: Date.now(),
+    name: `Version ${versions.length + 1}`,
+    timetable: result,
+  };
+
+  setVersions((prev) => [
+    ...prev,
+    newVersion,
+  ]);
+
+  setCurrentVersion(newVersion.id);
+};
 
   return (
     <div className="w-full overflow-auto">
@@ -234,6 +275,7 @@ function TimetableGenerator() {
         </div>
 
         {generatedTimetable && (
+          
 
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 overflow-x-auto">
 
@@ -267,6 +309,33 @@ function TimetableGenerator() {
               </div>
 
             </div>
+
+            {versions.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-black mb-3">
+                  Timetable Versions
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {versions.map((version) => (
+                    <button
+                      key={version.id}
+                      onClick={() => {
+                        setGeneratedTimetable(version.timetable);
+                        setCurrentVersion(version.id);
+                        setSelectedSlot(null);
+                      }}
+                      className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                        currentVersion === version.id
+                          ? 'bg-[#FF0436] text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {version.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <table className="w-full border-collapse">
 
@@ -337,17 +406,24 @@ function TimetableGenerator() {
       }
     } else {
       // Edit mode logic (existing)
-      if (period === "Free") return;
+      if (period === null || period === "Free") return;
       setEditingSlot({
         day,
         periodIndex: index,
         currentSubject: period,
       });
-      setSelectedSubject(period);
+      setSelectedSubject(period.subject);
     }
   }}
 >
-  {period}
+  {period === null || period === "Free" ? (
+    <span>Free</span>
+  ) : (
+    <div>
+      <div className="font-medium text-black">{period.subject}</div>
+      <div className="text-xs text-gray-500">{period.faculty}</div>
+    </div>
+  )}
 </td>
                       )
                     )}
@@ -379,6 +455,17 @@ function TimetableGenerator() {
         {editingSlot.day} - P{editingSlot.periodIndex + 1}
       </p>
 
+      {conflictMessage && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-300 rounded-xl">
+          <p className="text-red-700 font-semibold text-sm">
+            ⚠ Faculty Conflict Detected
+          </p>
+          <p className="text-red-700 text-sm mt-1">
+            {conflictMessage}
+          </p>
+        </div>
+      )}
+
       <select
   value={selectedSubject}
   onChange={(e) =>
@@ -407,7 +494,10 @@ function TimetableGenerator() {
       <div className="flex justify-end gap-3 mt-6">
 
         <button
-          onClick={() => setEditingSlot(null)}
+          onClick={() => {
+            setEditingSlot(null);
+            setConflictMessage("");
+          }}
           className="px-4 py-2 border rounded-xl"
         >
           Cancel
@@ -415,15 +505,46 @@ function TimetableGenerator() {
 
         <button
           onClick={() => {
-
+            // Check for conflicts
+            if (selectedSubject !== "Free") {
+              const selected = subjects.find((s) => s.name === selectedSubject);
+              const dayIndex = Object.keys(generatedTimetable).indexOf(editingSlot.day);
+              const slotsInPeriod = generatedTimetable[editingSlot.day];
+              
+              // Check if this faculty is already assigned in this period (excluding current slot)
+              let hasConflict = false;
+              for (let i = 0; i < slotsInPeriod.length; i++) {
+                if (i !== editingSlot.periodIndex) {
+                  const slot = slotsInPeriod[i];
+                  if (slot && slot.faculty === selected.faculty) {
+                    hasConflict = true;
+                    break;
+                  }
+                }
+              }
+              
+              if (hasConflict) {
+                setConflictMessage(`${selected.faculty} is already assigned during this period.`);
+                return;
+              }
+            }
+            
+            // Clear conflict message if no conflict
+            setConflictMessage("");
+            
             const updated = {
               ...generatedTimetable,
             };
 
-            updated[
-              editingSlot.day
-            ][editingSlot.periodIndex] =
-              selectedSubject;
+            if (selectedSubject === "Free") {
+              updated[editingSlot.day][editingSlot.periodIndex] = null;
+            } else {
+              const selected = subjects.find((s) => s.name === selectedSubject);
+              updated[editingSlot.day][editingSlot.periodIndex] = {
+                subject: selected.name,
+                faculty: selected.faculty,
+              };
+            }
 
             setGeneratedTimetable(updated);
 
