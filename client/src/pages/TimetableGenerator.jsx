@@ -88,17 +88,28 @@ function TimetableGenerator() {
   const [generatedTimetable, setGeneratedTimetable] =
     useState(null);
 
+  const [editingSlot, setEditingSlot] =
+  useState(null);
+
+   const [selectedSubject, setSelectedSubject] =
+  useState("");
+
   const [workingDays, setWorkingDays] =
     useState(5);
 
   const [periodsPerDay, setPeriodsPerDay] =
     useState(5);
 
+  const [selectedSlot, setSelectedSlot] =
+  useState(null);
+
   const [allowFreePeriods, setAllowFreePeriods] =
     useState(true);
 
   const [freePeriodDistribution, setFreePeriodDistribution] =
   useState("balanced");
+
+  const [swapMode, setSwapMode] = useState(false);
 
   const handleGenerate = () => {
     const result = generateSchedule(
@@ -232,12 +243,28 @@ function TimetableGenerator() {
                 Generated Timetable
               </h2>
 
-              <button
-                onClick={handleGenerate}
-                className="px-4 py-2 rounded-xl bg-red-50 text-[#FF0436] font-semibold hover:bg-red-100 transition-all"
-              >
-                Regenerate
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setSwapMode(!swapMode);
+                    setSelectedSlot(null);
+                  }}
+                  className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+                    swapMode
+                      ? 'bg-green-50 text-green-600 hover:bg-green-100'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {swapMode ? 'Swap Mode ON' : 'Swap Mode OFF'}
+                </button>
+
+                <button
+                  onClick={handleGenerate}
+                  className="px-4 py-2 rounded-xl bg-red-50 text-[#FF0436] font-semibold hover:bg-red-100 transition-all"
+                >
+                  Regenerate
+                </button>
+              </div>
 
             </div>
 
@@ -285,11 +312,43 @@ function TimetableGenerator() {
                     {periods.map(
                       (period, index) => (
                         <td
-                          key={index}
-                          className="p-3 text-center text-zinc-700"
-                        >
-                          {period || "-"}
-                        </td>
+  key={index}
+  className={`p-3 text-center cursor-pointer transition ${
+    swapMode
+      ? selectedSlot && selectedSlot.day === day && selectedSlot.periodIndex === index
+        ? 'bg-pink-200'
+        : 'hover:bg-pink-50'
+      : 'hover:bg-pink-50'
+  }`}
+  onClick={() => {
+    if (swapMode) {
+      // Swap mode logic
+      if (selectedSlot === null) {
+        // First click: select this cell
+        setSelectedSlot({ day, periodIndex: index });
+      } else {
+        // Second click: swap
+        const temp = generatedTimetable[selectedSlot.day][selectedSlot.periodIndex];
+        const updated = { ...generatedTimetable };
+        updated[selectedSlot.day][selectedSlot.periodIndex] = generatedTimetable[day][index];
+        updated[day][index] = temp;
+        setGeneratedTimetable(updated);
+        setSelectedSlot(null);
+      }
+    } else {
+      // Edit mode logic (existing)
+      if (period === "Free") return;
+      setEditingSlot({
+        day,
+        periodIndex: index,
+        currentSubject: period,
+      });
+      setSelectedSubject(period);
+    }
+  }}
+>
+  {period}
+</td>
                       )
                     )}
 
@@ -306,6 +365,82 @@ function TimetableGenerator() {
         )}
 
       </div>
+      {editingSlot && (
+
+  <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+
+    <div className="bg-white rounded-3xl p-8 w-full max-w-md">
+
+      <h2 className="text-2xl font-bold mb-6">
+        Edit Timetable Slot
+      </h2>
+
+      <p className="mb-4 text-gray-600">
+        {editingSlot.day} - P{editingSlot.periodIndex + 1}
+      </p>
+
+      <select
+  value={selectedSubject}
+  onChange={(e) =>
+    setSelectedSubject(e.target.value)
+  }
+  className="w-full border rounded-xl p-3"
+>
+
+  <option value="Free">
+    Free Period
+  </option>
+
+  {subjects.map((subject) => (
+
+    <option
+      key={subject.name}
+      value={subject.name}
+    >
+      {subject.name}
+    </option>
+
+  ))}
+
+</select>
+
+      <div className="flex justify-end gap-3 mt-6">
+
+        <button
+          onClick={() => setEditingSlot(null)}
+          className="px-4 py-2 border rounded-xl"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => {
+
+            const updated = {
+              ...generatedTimetable,
+            };
+
+            updated[
+              editingSlot.day
+            ][editingSlot.periodIndex] =
+              selectedSubject;
+
+            setGeneratedTimetable(updated);
+
+            setEditingSlot(null);
+          }}
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] text-white"
+        >
+          Save
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
     </div>
   );
 }
