@@ -152,8 +152,8 @@ function TimetableGenerator() {
                 Periods Per Day
               </label>
 
-              <input
-                type="number"
+                <input
+                    type="number"
                 value={periodsPerDay}
                 onChange={(e) =>
                   setPeriodsPerDay(Number(e.target.value))
