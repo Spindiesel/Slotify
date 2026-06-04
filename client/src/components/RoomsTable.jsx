@@ -4,19 +4,19 @@ function RoomsTable({ rooms, onDelete }) {
       <table className="w-full">
         <thead className="bg-gray-50">
           <tr>
-            <th className="text-left p-4">Room Number</th>
-            <th className="text-left p-4">Type</th>
-            <th className="text-left p-4">Capacity</th>
-            <th className="text-left p-4">Actions</th>
+            <th className="text-left p-4 font-semibold text-gray-900">Room Number</th>
+            <th className="text-left p-4 font-semibold text-gray-900">Type</th>
+            <th className="text-left p-4 font-semibold text-gray-900">Capacity</th>
+            <th className="text-left p-4 font-semibold text-gray-900">Actions</th>
           </tr>
         </thead>
 
         <tbody>
           {rooms.map((room) => (
             <tr key={room.id} className="border-t border-gray-100">
-              <td className="p-4 font-medium">{room.roomNumber}</td>
-              <td className="p-4">{room.type}</td>
-              <td className="p-4">{room.capacity}</td>
+              <td className="p-4 font-medium text-gray-900">{room.roomNumber}</td>
+              <td className="p-4 text-gray-900">{room.type}</td>
+              <td className="p-4 text-gray-900">{room.capacity}</td>
               <td className="p-4">
                 <button
                   onClick={() => onDelete(room.id)}

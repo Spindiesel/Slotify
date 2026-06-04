@@ -25,7 +25,7 @@ function AddSubjectModal({ onClose, onAdd }) {
 
       <div className="bg-white rounded-3xl p-8 w-full max-w-md">
 
-        <h2 className="text-2xl font-bold mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
           Add Subject
         </h2>
 

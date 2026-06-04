@@ -1,6 +1,8 @@
 import DashboardCard from "../components/DashboardCard";
+import { useTheme } from "../context/ThemeContext";
 
 function Dashboard() {
+  const { bg, text, border } = useTheme();
   const recentActivities = [
     {
       id: 1,
@@ -40,14 +42,14 @@ function Dashboard() {
   ];
 
   return (
-    <div className="w-full overflow-auto">
+    <div className={`w-full overflow-auto ${bg.page}`}>
       <div className="p-4 sm:p-6 lg:p-10 w-full">
         {/* Welcome Section */}
         <div className="mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black mb-2 sm:mb-3">
+          <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-bold ${text.primary} mb-2 sm:mb-3`}>
             Welcome back, Admin! 👋
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-zinc-600 font-medium">
+          <p className={`text-base sm:text-lg lg:text-xl ${text.secondary} font-medium`}>
             Here's what's happening with your institution today.
           </p>
         </div>
@@ -84,8 +86,8 @@ function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 w-full">
           {/* Recent Activity */}
           <div className="lg:col-span-2 w-full">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 w-full overflow-x-hidden">
-              <h2 className="text-xl sm:text-2xl font-bold text-black mb-6 sm:mb-8">
+            <div className={`${bg.card} rounded-3xl p-6 sm:p-8 shadow-sm border ${border} w-full overflow-x-hidden`}>
+              <h2 className={`text-xl sm:text-2xl font-bold ${text.primary} mb-6 sm:mb-8`}>
                 Recent Activity
               </h2>
 
@@ -93,15 +95,15 @@ function Dashboard() {
                 {recentActivities.map((activity, index) => (
                   <div
                     key={activity.id}
-                    className={`flex items-start gap-3 sm:gap-4 py-4 sm:py-5 px-3 sm:px-4 rounded-2xl transition-all hover:bg-gray-50 ${
-                      index !== recentActivities.length - 1 ? "border-b border-gray-100" : ""
+                    className={`flex items-start gap-3 sm:gap-4 py-4 sm:py-5 px-3 sm:px-4 rounded-2xl transition-all hover:opacity-75 ${
+                      index !== recentActivities.length - 1 ? `border-b ${border}` : ""
                     }`}
                   >
                     {/* Timeline Indicator */}
                     <div className="flex flex-col items-center pt-1 flex-shrink-0">
                       <div className="w-3 h-3 rounded-full bg-[#FF0436] shadow-sm"></div>
                       {index !== recentActivities.length - 1 && (
-                        <div className="w-0.5 h-12 bg-gray-200 mt-2"></div>
+                        <div className={`w-0.5 h-12 ${bg.page === 'bg-gray-50' ? 'bg-gray-200' : 'bg-gray-600'} mt-2`}></div>
                       )}
                     </div>
 
@@ -109,10 +111,10 @@ function Dashboard() {
                     <div className="flex-1 pt-0.5 min-w-0 w-full">
                       <div className="flex items-start justify-between gap-2 w-full">
                         <div className="flex-1 min-w-0">
-                          <p className="text-zinc-900 font-semibold text-sm sm:text-base break-words">
+                          <p className={`${text.primary} font-semibold text-sm sm:text-base break-words`}>
                             {activity.message}
                           </p>
-                          <p className="text-zinc-500 text-xs sm:text-sm mt-1">
+                          <p className={`${text.tertiary} text-xs sm:text-sm mt-1`}>
                             {activity.timestamp}
                           </p>
                         </div>

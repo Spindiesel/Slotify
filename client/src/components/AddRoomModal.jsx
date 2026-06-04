@@ -22,7 +22,7 @@ function AddRoomModal({ onClose, onAdd }) {
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
       <div className="bg-white rounded-3xl p-8 w-full max-w-md">
 
-        <h2 className="text-2xl font-bold mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
           Add Room
         </h2>
 

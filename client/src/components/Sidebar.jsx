@@ -1,7 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 
 function Sidebar({ open, setOpen }) {
   const location = useLocation();
+  const { bg, text, border } = useTheme();
 
   const isActive = (path) => location.pathname === path;
 
@@ -10,8 +12,10 @@ function Sidebar({ open, setOpen }) {
     { path: "/faculty", label: "Faculty", icon: "FC" },
     { path: "/subjects", label: "Subjects", icon: "SB" },
     { path: "/rooms", label: "Rooms", icon: "RM" },
+    { path: "/sections", label: "Sections", icon: "SC" },
     { path: "/timetables", label: "Timetable Generator", icon: "TT" },
     { path: "/settings", label: "Settings", icon: "ST" },
+    
   ];
 
   return (
@@ -24,7 +28,7 @@ function Sidebar({ open, setOpen }) {
       )}
 
       <aside
-        className={`fixed left-0 top-0 z-40 flex h-screen w-64 flex-shrink-0 flex-col border-r border-gray-200 bg-white p-6 transition-transform duration-300 ease-in-out lg:static ${
+        className={`fixed left-0 top-0 z-40 flex h-screen w-64 flex-shrink-0 flex-col ${border} border-r ${bg.card} p-6 transition-transform duration-300 ease-in-out lg:static ${
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -59,7 +63,7 @@ function Sidebar({ open, setOpen }) {
               className={`flex items-center gap-3 rounded-2xl px-4 py-3 font-semibold transition-all duration-200 ${
                 isActive(item.path)
                   ? "bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] text-white shadow-md"
-                  : "text-zinc-700 hover:bg-gray-50 hover:text-[#FF0436]"
+                  : `${text.secondary} hover:bg-gray-100 hover:text-[#FF0436] dark:hover:bg-gray-700`
               }`}
             >
               <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-current/10 text-xs font-bold">
@@ -70,8 +74,8 @@ function Sidebar({ open, setOpen }) {
           ))}
         </nav>
 
-        <div className="flex-shrink-0 border-t border-gray-200 pt-6">
-          <p className="text-xs text-zinc-500">App In Development Not Deployed</p>
+        <div className={`flex-shrink-0 ${border} border-t pt-6`}>
+          <p className={`text-xs ${text.tertiary}`}>App In Development Not Deployed</p>
         </div>
       </aside>
     </>

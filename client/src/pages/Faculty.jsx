@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 import FacultyTable from "../components/FacultyTable";
 import AddFacultyModal from "../components/AddFacultyModal";
 
 function Faculty() {
+  const { bg, text, border } = useTheme();
 
   const [showModal, setShowModal] = useState(false);
 
@@ -40,17 +42,17 @@ function Faculty() {
 };
 
   return (
-    <div className="w-full overflow-auto">
+    <div className={`w-full overflow-auto ${bg.page}`}>
       <div className="p-4 sm:p-6 lg:p-8 w-full">
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
 
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-black">
+            <h1 className={`text-3xl sm:text-4xl font-bold ${text.primary}`}>
               Faculty Management
             </h1>
 
-            <p className="text-zinc-600 mt-2 text-sm sm:text-base">
+            <p className={`${text.secondary} mt-2 text-sm sm:text-base`}>
               Manage all faculty members.
             </p>
           </div>

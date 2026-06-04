@@ -4,10 +4,10 @@ function FacultyTable({ faculty, onDelete }) {
       <table className="w-full">
         <thead className="bg-gray-50">
           <tr>
-            <th className="text-left p-4">Name</th>
-            <th className="text-left p-4">Department</th>
-            <th className="text-left p-4">Subjects</th>
-            <th className="text-left p-4">Actions</th>
+            <th className="text-left p-4 font-semibold text-gray-900">Name</th>
+            <th className="text-left p-4 font-semibold text-gray-900">Department</th>
+            <th className="text-left p-4 font-semibold text-gray-900">Subjects</th>
+            <th className="text-left p-4 font-semibold text-gray-900">Actions</th>
           </tr>
         </thead>
 
@@ -17,15 +17,15 @@ function FacultyTable({ faculty, onDelete }) {
               key={item.id}
               className="border-t border-gray-100"
             >
-              <td className="p-4 font-medium">
+              <td className="p-4 font-medium text-gray-900">
                 {item.name}
               </td>
 
-              <td className="p-4">
+              <td className="p-4 text-gray-900">
                 {item.department}
               </td>
 
-              <td className="p-4">
+              <td className="p-4 text-gray-900">
                 {item.subjects}
               </td>
 

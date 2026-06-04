@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 import SubjectsTable from "../components/SubjectsTable";
 import AddSubjectModal from "../components/AddSubjectModal";
 
 function Subjects() {
+  const { bg, text, border } = useTheme();
 
   const [showModal, setShowModal] = useState(false);
 
