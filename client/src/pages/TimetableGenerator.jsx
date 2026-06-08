@@ -571,8 +571,7 @@ const handleGenerate = () => {
 
                   <tr
                     key={day}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                  >
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
 
                     <td className="p-3 font-semibold text-zinc-900">
                       {day}
