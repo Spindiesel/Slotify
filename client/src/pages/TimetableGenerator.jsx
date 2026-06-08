@@ -21,10 +21,9 @@ function generateSchedule(
     timetable[day] = Array(periodsPerDay).fill(null);
   });
 
-  // Create subject pool
   const subjectPool = [];
   subjects.forEach((subject) => {
-    for (let i = 0; i < subject.hoursPerWeek; i++) {
+    for (let i = 0; i < subject.hoursPerWeek; i += 1) {
       subjectPool.push({
         subject: subject.name,
         faculty: subject.faculty,
@@ -32,40 +31,49 @@ function generateSchedule(
     }
   });
 
-  // Shuffle subject pool
-  for (let i = subjectPool.length - 1; i > 0; i--) {
+  for (let i = subjectPool.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
-    [subjectPool[i], subjectPool[j]] = [
-      subjectPool[j],
-      subjectPool[i],
-    ];
+    [subjectPool[i], subjectPool[j]] = [subjectPool[j], subjectPool[i]];
   }
 
-  // Create all available slots
   const allSlots = [];
   days.forEach((day) => {
-    for (let p = 0; p < periodsPerDay; p++) {
-      allSlots.push({
-        day,
-        period: p,
-      });
+    for (let period = 0; period < periodsPerDay; period += 1) {
+      allSlots.push({ day, period });
     }
   });
 
-  // Shuffle slots if random distribution
   if (freePeriodDistribution === "random") {
     allSlots.sort(() => Math.random() - 0.5);
   }
 
-  // Assign subjects to slots
   let index = 0;
-  for (let i = 0; i < allSlots.length && index < subjectPool.length; i++) {
+  for (let i = 0; i < allSlots.length && index < subjectPool.length; i += 1) {
     const slot = allSlots[i];
     timetable[slot.day][slot.period] = subjectPool[index];
-    index++;
+    index += 1;
+  }
+
+  if (!allowFreePeriods) {
+    return timetable;
+  }
+
+  if (freePeriodDistribution === "end") {
+    Object.keys(timetable).forEach((day) => {
+      const scheduled = timetable[day].filter(Boolean);
+      const freeCount = periodsPerDay - scheduled.length;
+      timetable[day] = [...scheduled, ...Array(freeCount).fill(null)].slice(
+        0,
+        periodsPerDay
+      );
+    });
   }
 
   return timetable;
+}
+
+function cloneTimetables(timetables) {
+  return JSON.parse(JSON.stringify(timetables));
 }
 
 function TimetableGenerator() {
@@ -92,396 +100,373 @@ function TimetableGenerator() {
     },
   ];
 
-  const [generatedTimetable, setGeneratedTimetable] =
-  useState(null);
+  const facultyList = ["Dr Rao", "Dr Sharma", "Dr Patel", "Dr Kumar"];
+  const sectionList = ["CSE-A", "CSE-B", "CSE-C"];
 
-  const [editingSlot, setEditingSlot] =
-  useState(null);
-
-   const [selectedSubject, setSelectedSubject] =
-  useState("");
-
-  const [workingDays, setWorkingDays] =
-    useState(5);
-
-  const [periodsPerDay, setPeriodsPerDay] =
-    useState(5);
-
-  const [selectedSlot, setSelectedSlot] =
-  useState(null);
-
-  const [versions, setVersions] =
-  useState([]);
-
-const [currentVersion, setCurrentVersion] =
-  useState(null);
-
-  const [allowFreePeriods, setAllowFreePeriods] =
-    useState(true);
-
-  const [freePeriodDistribution, setFreePeriodDistribution] =
-  useState("balanced");
-
+  const [generatedTimetables, setGeneratedTimetables] = useState({});
+  const [editingSlot, setEditingSlot] = useState(null);
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [workingDays, setWorkingDays] = useState(5);
+  const [periodsPerDay, setPeriodsPerDay] = useState(5);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [versions, setVersions] = useState([]);
+  const [currentVersion, setCurrentVersion] = useState(null);
+  const [allowFreePeriods, setAllowFreePeriods] = useState(true);
+  const [freePeriodDistribution, setFreePeriodDistribution] = useState("balanced");
   const [swapMode, setSwapMode] = useState(false);
-
   const [conflictMessage, setConflictMessage] = useState("");
+  const [selectedFaculty, setSelectedFaculty] = useState(facultyList);
+  const [selectedSections, setSelectedSections] = useState(sectionList);
 
-  const checkFacultyConflict = (facultyName, dayIndex, periodIndex) => {
-  if (!generatedTimetable) return false;
+  const hasGeneratedTimetables = Object.keys(generatedTimetables).length > 0;
 
-  const slotsInPeriod =
-    generatedTimetable[
-      Object.keys(generatedTimetable)[dayIndex]
-    ];
+  const checkFacultyConflict = (
+    facultyName,
+    sectionName,
+    day,
+    periodIndex,
+    ignoreCurrentSlot = false
+  ) => {
+    if (!facultyName || !hasGeneratedTimetables) {
+      return false;
+    }
 
-  if (!slotsInPeriod) return false;
+    return Object.entries(generatedTimetables).some(([sectionKey, timetable]) => {
+      const slot = timetable?.[day]?.[periodIndex];
 
-  const slot = slotsInPeriod[periodIndex];
+      if (!slot || slot === "Free" || slot.faculty !== facultyName) {
+        return false;
+      }
 
-  if (slot && slot.faculty === facultyName) {
-    return true;
-  }
+      if (
+        ignoreCurrentSlot &&
+        sectionKey === sectionName &&
+        editingSlot &&
+        editingSlot.day === day &&
+        editingSlot.periodIndex === periodIndex
+      ) {
+        return false;
+      }
 
-  return false;
-};
-
-const facultyList = [
-  "Dr Rao",
-  "Dr Sharma",
-  "Dr Patel",
-  "Dr Kumar",
-];
-
-const sectionList = [
-  "CSE-A",
-  "CSE-B",
-  "CSE-C",
-];
-
-const [selectedFaculty, setSelectedFaculty] =
-  useState(facultyList);
-
-const [selectedSections, setSelectedSections] =
-  useState(sectionList);
-
-
-
-
-
-
-const handleGenerate = () => {
-
-  const filteredSubjects =
-    subjects.filter((subject) =>
-      selectedFaculty.includes(
-        subject.faculty
-      )
-    );
-
-  const result = generateSchedule(
-    filteredSubjects,
-    workingDays,
-    periodsPerDay,
-    allowFreePeriods,
-    freePeriodDistribution
-  );
-
-  setGeneratedTimetable(result);
-
-  const newVersion = {
-    id: Date.now(),
-    name: `Version ${versions.length + 1}`,
-    timetable: result,
+      return true;
+    });
   };
 
-  setVersions((prev) => [
-    ...prev,
-    newVersion,
-  ]);
+  const saveVersionSnapshot = (timetables) => {
+    const snapshot = cloneTimetables(timetables);
+    const newVersion = {
+      id: Date.now(),
+      name: `Version ${versions.length + 1}`,
+      timetables: snapshot,
+    };
 
-  setCurrentVersion(newVersion.id);
-};
+    setVersions((prev) => [...prev, newVersion]);
+    setCurrentVersion(newVersion.id);
+  };
+
+  const handleGenerate = () => {
+    const filteredSubjects = subjects.filter((subject) =>
+      selectedFaculty.includes(subject.faculty)
+    );
+
+    const nextTimetables = {};
+
+    selectedSections.forEach((section) => {
+      nextTimetables[section] = generateSchedule(
+        filteredSubjects,
+        workingDays,
+        periodsPerDay,
+        allowFreePeriods,
+        freePeriodDistribution
+      );
+    });
+
+    setGeneratedTimetables(nextTimetables);
+    setEditingSlot(null);
+    setSelectedSlot(null);
+    setSwapMode(false);
+    setConflictMessage("");
+    saveVersionSnapshot(nextTimetables);
+  };
+
+  const handleSwapCellClick = (section, day, periodIndex) => {
+    if (!swapMode) {
+      return;
+    }
+
+    if (
+      selectedSlot &&
+      selectedSlot.section === section &&
+      selectedSlot.day === day &&
+      selectedSlot.periodIndex === periodIndex
+    ) {
+      setSelectedSlot(null);
+      return;
+    }
+
+    if (!selectedSlot) {
+      setSelectedSlot({ section, day, periodIndex });
+      return;
+    }
+
+    if (selectedSlot.section !== section) {
+      setSelectedSlot({ section, day, periodIndex });
+      return;
+    }
+
+    const updatedTimetables = cloneTimetables(generatedTimetables);
+    const temp =
+      updatedTimetables[section][selectedSlot.day][selectedSlot.periodIndex];
+
+    updatedTimetables[section][selectedSlot.day][selectedSlot.periodIndex] =
+      updatedTimetables[section][day][periodIndex];
+    updatedTimetables[section][day][periodIndex] = temp;
+
+    setGeneratedTimetables(updatedTimetables);
+    setSelectedSlot(null);
+  };
+
+  const handleEditCellClick = (section, day, periodIndex, period) => {
+    setEditingSlot({
+      section,
+      day,
+      periodIndex,
+      currentSubject: period,
+    });
+    setSelectedSubject(period?.subject ?? "Free");
+    setConflictMessage("");
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingSlot) {
+      return;
+    }
+
+    if (selectedSubject !== "Free") {
+      const selected = subjects.find((subject) => subject.name === selectedSubject);
+
+      if (
+        selected &&
+        checkFacultyConflict(
+          selected.faculty,
+          editingSlot.section,
+          editingSlot.day,
+          editingSlot.periodIndex,
+          true
+        )
+      ) {
+        setConflictMessage(
+          `${selected.faculty} is already assigned to another section during this period.`
+        );
+        return;
+      }
+    }
+
+    const updatedTimetables = cloneTimetables(generatedTimetables);
+
+    if (selectedSubject === "Free") {
+      updatedTimetables[editingSlot.section][editingSlot.day][
+        editingSlot.periodIndex
+      ] = null;
+    } else {
+      const selected = subjects.find((subject) => subject.name === selectedSubject);
+      updatedTimetables[editingSlot.section][editingSlot.day][
+        editingSlot.periodIndex
+      ] = {
+        subject: selected.name,
+        faculty: selected.faculty,
+      };
+    }
+
+    setGeneratedTimetables(updatedTimetables);
+    setEditingSlot(null);
+    setConflictMessage("");
+  };
 
   return (
     <div className="w-full overflow-auto">
-      <div className="p-4 sm:p-6 lg:p-8 w-full">
-
-        <h1 className="text-3xl sm:text-4xl font-bold text-black mb-2">
+      <div className="w-full p-4 sm:p-6 lg:p-8">
+        <h1 className="mb-2 text-3xl font-bold text-black sm:text-4xl">
           Timetable Generator
         </h1>
 
-        <p className="text-zinc-600 mb-8 text-sm sm:text-base">
+        <p className="mb-8 text-sm text-zinc-600 sm:text-base">
           Generate smart academic timetables.
         </p>
 
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 mb-8">
-
-          <h2 className="text-xl sm:text-2xl font-semibold text-black mb-6">
+        <div className="mb-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-6 text-xl font-semibold text-black sm:text-2xl">
             Generator Settings
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block mb-2 font-medium text-zinc-900">
+              <label className="mb-2 block font-medium text-zinc-900">
                 Working Days
               </label>
 
               <input
                 type="number"
                 value={workingDays}
-                onChange={(e) =>
-                  setWorkingDays(Number(e.target.value))
-                }
-                className="w-full border border-gray-300 rounded-xl p-3 text-black focus:outline-none focus:ring-2 focus:ring-[#FF0436]"
+                onChange={(event) => setWorkingDays(Number(event.target.value))}
+                className="w-full rounded-xl border border-gray-300 p-3 text-black focus:outline-none focus:ring-2 focus:ring-[#FF0436]"
               />
             </div>
 
             <div>
-              <label className="block mb-2 font-medium text-zinc-900">
+              <label className="mb-2 block font-medium text-zinc-900">
                 Periods Per Day
               </label>
 
-                <input
-                    type="number"
+              <input
+                type="number"
                 value={periodsPerDay}
-                onChange={(e) =>
-                  setPeriodsPerDay(Number(e.target.value))
-                }
-                className="w-full border border-gray-300 rounded-xl p-3 text-black focus:outline-none focus:ring-2 focus:ring-[#FF0436]"
+                onChange={(event) => setPeriodsPerDay(Number(event.target.value))}
+                className="w-full rounded-xl border border-gray-300 p-3 text-black focus:outline-none focus:ring-2 focus:ring-[#FF0436]"
               />
             </div>
-
           </div>
 
           <div className="mt-6">
-
-            <label className="flex items-center gap-3 cursor-pointer">
-
+            <label className="flex cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
                 checked={allowFreePeriods}
-                onChange={(e) =>
-                  setAllowFreePeriods(e.target.checked)
-                }
-                className="w-4 h-4 rounded"
+                onChange={(event) => setAllowFreePeriods(event.target.checked)}
+                className="h-4 w-4 rounded"
               />
 
               <span className="font-medium text-zinc-900">Allow Free Periods</span>
-
             </label>
 
             {allowFreePeriods && (
               <div className="mt-6">
-
-                <label className="block mb-3 font-medium text-zinc-900">
+                <label className="mb-3 block font-medium text-zinc-900">
                   Free Period Distribution
                 </label>
 
                 <select
                   value={freePeriodDistribution}
-                  onChange={(e) =>
-                    setFreePeriodDistribution(e.target.value)
+                  onChange={(event) =>
+                    setFreePeriodDistribution(event.target.value)
                   }
-                  className="w-full border border-gray-300 rounded-xl p-3 text-black focus:outline-none focus:ring-2 focus:ring-[#FF0436]"
+                  className="w-full rounded-xl border border-gray-300 p-3 text-black focus:outline-none focus:ring-2 focus:ring-[#FF0436]"
                 >
-                  <option value="balanced">
-                    Balanced
-                  </option>
-
-                  <option value="end">
-                    End of Day
-                  </option>
-
-                  <option value="random">
-                    Random
-                  </option>
+                  <option value="balanced">Balanced</option>
+                  <option value="end">End of Day</option>
+                  <option value="random">Random</option>
                 </select>
-
               </div>
             )}
-
           </div>
 
-         <div className="mt-6">
+          <div className="mt-6">
+            <label className="mb-3 block font-medium text-zinc-900">
+              Faculty Selection
+            </label>
 
-  <label className="block mb-3 font-medium text-zinc-900">
-    Faculty Selection
-  </label>
+            <div className="mb-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedFaculty(facultyList)}
+                className="rounded-lg bg-gray-100 px-3 py-2"
+              >
+                Select All
+              </button>
 
-  <div className="flex gap-2 mb-4">
+              <button
+                type="button"
+                onClick={() => setSelectedFaculty([])}
+                className="rounded-lg bg-gray-100 px-3 py-2"
+              >
+                Clear All
+              </button>
+            </div>
 
-    <button
-      type="button"
-      onClick={() =>
-        setSelectedFaculty(
-          facultyList
-        )
-      }
-      className="px-3 py-2 rounded-lg bg-gray-100"
-    >
-      Select All
-    </button>
+            <div className="mb-6 grid grid-cols-2 gap-2">
+              {facultyList.map((faculty) => (
+                <label key={faculty} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedFaculty.includes(faculty)}
+                    onChange={() => {
+                      if (selectedFaculty.includes(faculty)) {
+                        setSelectedFaculty(
+                          selectedFaculty.filter((item) => item !== faculty)
+                        );
+                        return;
+                      }
 
-    <button
-      type="button"
-      onClick={() =>
-        setSelectedFaculty([])
-      }
-      className="px-3 py-2 rounded-lg bg-gray-100"
-    >
-      Clear All
-    </button>
+                      setSelectedFaculty([...selectedFaculty, faculty]);
+                    }}
+                  />
 
-  </div>
+                  {faculty}
+                </label>
+              ))}
+            </div>
+          </div>
 
-  <div className="grid grid-cols-2 gap-2 mb-6">
+          <div className="mt-6">
+            <label className="mb-3 block font-medium text-zinc-900">
+              Section Selection
+            </label>
 
-    {facultyList.map((faculty) => (
+            <div className="mb-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedSections(sectionList)}
+                className="rounded-lg bg-gray-100 px-3 py-2"
+              >
+                Select All
+              </button>
 
-      <label
-        key={faculty}
-        className="flex items-center gap-2"
-      >
+              <button
+                type="button"
+                onClick={() => setSelectedSections([])}
+                className="rounded-lg bg-gray-100 px-3 py-2"
+              >
+                Clear All
+              </button>
+            </div>
 
-        <input
-          type="checkbox"
-          checked={selectedFaculty.includes(
-            faculty
-          )}
-          onChange={() => {
+            <div className="grid grid-cols-2 gap-2">
+              {sectionList.map((section) => (
+                <label key={section} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedSections.includes(section)}
+                    onChange={() => {
+                      if (selectedSections.includes(section)) {
+                        setSelectedSections(
+                          selectedSections.filter((item) => item !== section)
+                        );
+                        return;
+                      }
 
-            if (
-              selectedFaculty.includes(
-                faculty
-              )
-            ) {
+                      setSelectedSections([...selectedSections, section]);
+                    }}
+                  />
 
-              setSelectedFaculty(
-                selectedFaculty.filter(
-                  (f) => f !== faculty
-                )
-              );
+                  {section}
+                </label>
+              ))}
+            </div>
+          </div>
 
-            } else {
-
-              setSelectedFaculty([
-                ...selectedFaculty,
-                faculty,
-              ]);
-
-            }
-
-          }}
-        />
-
-        {faculty}
-
-      </label>
-
-    ))}
-
-  </div>
-<div className="mt-6">
-
-  <label className="block mb-3 font-medium text-zinc-900">
-    Section Selection
-  </label>
-
-  <div className="flex gap-2 mb-4">
-
-    <button
-      type="button"
-      onClick={() =>
-        setSelectedSections(sectionList)
-      }
-      className="px-3 py-2 rounded-lg bg-gray-100"
-    >
-      Select All
-    </button>
-
-    <button
-      type="button"
-      onClick={() =>
-        setSelectedSections([])
-      }
-      className="px-3 py-2 rounded-lg bg-gray-100"
-    >
-      Clear All
-    </button>
-
-  </div>
-
-  <div className="grid grid-cols-2 gap-2">
-
-    {sectionList.map((section) => (
-
-      <label
-        key={section}
-        className="flex items-center gap-2"
-      >
-
-        <input
-          type="checkbox"
-          checked={selectedSections.includes(
-            section
-          )}
-          onChange={() => {
-
-            if (
-              selectedSections.includes(
-                section
-              )
-            ) {
-
-              setSelectedSections(
-                selectedSections.filter(
-                  (s) => s !== section
-                )
-              );
-
-            } else {
-
-              setSelectedSections([
-                ...selectedSections,
-                section,
-              ]);
-
-            }
-
-          }}
-        />
-
-        {section}
-
-      </label>
-
-    ))}
-
-  </div>
-
-</div>
-  <button
-  
-    onClick={handleGenerate}
-    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] text-white font-semibold hover:shadow-lg transition-all"
-  >
-    Generate Timetable
-  </button>
-
-</div>
-
+          <button
+            onClick={handleGenerate}
+            className="mt-6 rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] px-6 py-3 font-semibold text-white transition-all hover:shadow-lg"
+          >
+            Generate Timetable
+          </button>
         </div>
 
-        {generatedTimetable && (
-          
-
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 overflow-x-auto">
-
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-
-              <h2 className="text-xl sm:text-2xl font-semibold text-black">
-                Generated Timetable
+        {hasGeneratedTimetables && (
+          <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+              <h2 className="text-xl font-semibold text-black sm:text-2xl">
+                Generated Timetables
               </h2>
 
               <div className="flex gap-3">
@@ -490,43 +475,46 @@ const handleGenerate = () => {
                     setSwapMode(!swapMode);
                     setSelectedSlot(null);
                   }}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+                  className={`rounded-xl px-4 py-2 font-semibold transition-all ${
                     swapMode
-                      ? 'bg-green-50 text-green-600 hover:bg-green-100'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? "bg-green-50 text-green-600 hover:bg-green-100"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
-                  {swapMode ? 'Swap Mode ON' : 'Swap Mode OFF'}
+                  {swapMode ? "Swap Mode ON" : "Swap Mode OFF"}
                 </button>
 
                 <button
                   onClick={handleGenerate}
-                  className="px-4 py-2 rounded-xl bg-red-50 text-[#FF0436] font-semibold hover:bg-red-100 transition-all"
+                  className="rounded-xl bg-red-50 px-4 py-2 font-semibold text-[#FF0436] transition-all hover:bg-red-100"
                 >
                   Regenerate
                 </button>
               </div>
-
             </div>
 
             {versions.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-black mb-3">
+                <h3 className="mb-3 text-lg font-semibold text-black">
                   Timetable Versions
                 </h3>
+
                 <div className="flex flex-wrap gap-2">
                   {versions.map((version) => (
                     <button
                       key={version.id}
                       onClick={() => {
-                        setGeneratedTimetable(version.timetable);
+                        setGeneratedTimetables(cloneTimetables(version.timetables));
                         setCurrentVersion(version.id);
                         setSelectedSlot(null);
+                        setSwapMode(false);
+                        setEditingSlot(null);
+                        setConflictMessage("");
                       }}
-                      className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                      className={`rounded-xl px-4 py-2 font-medium transition-all ${
                         currentVersion === version.id
-                          ? 'bg-[#FF0436] text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? "bg-[#FF0436] text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       {version.name}
@@ -535,235 +523,154 @@ const handleGenerate = () => {
                 </div>
               </div>
             )}
-                
 
-            <table className="w-full border-collapse">
+            <div className="space-y-10">
+              {Object.entries(generatedTimetables).map(([section, timetable]) => (
+                <div key={section}>
+                  <h3 className="mb-4 text-lg font-semibold text-black sm:text-xl">
+                    {section} Timetable
+                  </h3>
 
-              <thead>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="p-3 text-left font-semibold text-black">
+                            Day
+                          </th>
 
-                <tr className="border-b border-gray-200">
+                          {Array.from({ length: periodsPerDay }, (_, index) => (
+                            <th
+                              key={index}
+                              className="p-3 text-center font-semibold text-black"
+                            >
+                              P{index + 1}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
 
-                  <th className="p-3 text-left font-semibold text-black">
-                    Day
-                  </th>
+                      <tbody>
+                        {Object.entries(timetable).map(([day, periods]) => (
+                          <tr
+                            key={`${section}-${day}`}
+                            className="border-b border-gray-100 transition-colors hover:bg-gray-50"
+                          >
+                            <td className="p-3 font-semibold text-zinc-900">
+                              {day}
+                            </td>
 
-                  {Array.from(
-                    { length: periodsPerDay },
-                    (_, i) => (
-                      <th
-                        key={i}
-                        className="p-3 text-center font-semibold text-black"
-                      >
-                        P{i + 1}
-                      </th>
-                    )
-                  )}
+                            {periods.map((period, periodIndex) => {
+                              const isSelectedSwapCell =
+                                selectedSlot &&
+                                selectedSlot.section === section &&
+                                selectedSlot.day === day &&
+                                selectedSlot.periodIndex === periodIndex;
 
-                </tr>
+                              return (
+                                <td
+                                  key={`${section}-${day}-${periodIndex}`}
+                                  className={`cursor-pointer p-3 text-center transition ${
+                                    swapMode
+                                      ? isSelectedSwapCell
+                                        ? "bg-pink-200"
+                                        : "hover:bg-pink-50"
+                                      : "hover:bg-pink-50"
+                                  }`}
+                                  onClick={() => {
+                                    if (swapMode) {
+                                      handleSwapCellClick(section, day, periodIndex);
+                                      return;
+                                    }
 
-              </thead>
-
-              <tbody>
-
-                {Object.entries(
-  generatedTimetable
-).map(([day, periods]) => (
-
-                  <tr
-                    key={day}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-
-                    <td className="p-3 font-semibold text-zinc-900">
-                      {day}
-                    </td>
-
-                    {periods.map(
-                      (period, index) => (
-                        <td
-  key={index}
-  className={`p-3 text-center cursor-pointer transition ${
-    swapMode
-      ? selectedSlot && selectedSlot.day === day && selectedSlot.periodIndex === index
-        ? 'bg-pink-200'
-        : 'hover:bg-pink-50'
-      : 'hover:bg-pink-50'
-  }`}
-  onClick={() => {
-    if (swapMode) {
-      // Swap mode logic
-      if (selectedSlot === null) {
-        // First click: select this cell
-        setSelectedSlot({ day, periodIndex: index });
-      } else {
-        // Second click: swap
-        const temp = generatedTimetable[selectedSlot.day][selectedSlot.periodIndex];
-        const updated = { ...generatedTimetable };
-        updated[selectedSlot.day][selectedSlot.periodIndex] = generatedTimetable[day][index];
-        updated[day][index] = temp;
-        setGeneratedTimetable(updated);
-        setSelectedSlot(null);
-      }
-    } else {
-      // Edit mode logic (existing)
-      if (period === null || period === "Free") return;
-      setEditingSlot({
-        day,
-        periodIndex: index,
-        currentSubject: period,
-      });
-      setSelectedSubject(period.subject);
-    }
-  }}
->
-  {period === null || period === "Free" ? (
-    <span>Free</span>
-  ) : (
-    <div>
-      <div className="font-medium text-black">{period.subject}</div>
-      <div className="text-xs text-gray-500">{period.faculty}</div>
-    </div>
-  )}
-</td>
-                      )
-                    )}
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-              </table>
-
+                                    handleEditCellClick(section, day, periodIndex, period);
+                                  }}
+                                >
+                                  {period === null || period === "Free" ? (
+                                    <span>Free</span>
+                                  ) : (
+                                    <div>
+                                      <div className="font-medium text-black">
+                                        {period.subject}
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        {period.faculty}
+                                      </div>
+                                    </div>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-
-              )}
-
+        )}
       </div>
+
       {editingSlot && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30">
+          <div className="w-full max-w-md rounded-3xl bg-white p-8">
+            <h2 className="mb-6 text-2xl font-bold text-gray-900">
+              Edit Timetable Slot
+            </h2>
 
-  <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+            <p className="mb-2 text-gray-600">{editingSlot.section}</p>
+            <p className="mb-4 text-gray-600">
+              {editingSlot.day} - P{editingSlot.periodIndex + 1}
+            </p>
 
-    <div className="bg-white rounded-3xl p-8 w-full max-w-md">
+            {conflictMessage && (
+              <div className="mb-4 rounded-xl border border-red-300 bg-red-50 p-4">
+                <p className="text-sm font-semibold text-red-700">
+                  Warning: Faculty Conflict Detected
+                </p>
+                <p className="mt-1 text-sm text-red-700">{conflictMessage}</p>
+              </div>
+            )}
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        Edit Timetable Slot
-      </h2>
+            <select
+              value={selectedSubject}
+              onChange={(event) => setSelectedSubject(event.target.value)}
+              className="w-full rounded-xl border p-3"
+            >
+              <option value="Free">Free Period</option>
 
-      <p className="mb-4 text-gray-600">
-        {editingSlot.day} - P{editingSlot.periodIndex + 1}
-      </p>
+              {subjects.map((subject) => (
+                <option key={subject.name} value={subject.name}>
+                  {subject.name}
+                </option>
+              ))}
+            </select>
 
-      {conflictMessage && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-300 rounded-xl">
-          <p className="text-red-700 font-semibold text-sm">
-            ⚠ Faculty Conflict Detected
-          </p>
-          <p className="text-red-700 text-sm mt-1">
-            {conflictMessage}
-          </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setEditingSlot(null);
+                  setConflictMessage("");
+                }}
+                className="rounded-xl border px-4 py-2"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleSaveEdit}
+                className="rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] px-4 py-2 text-white"
+              >
+                Save
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
-      <select
-  value={selectedSubject}
-  onChange={(e) =>
-    setSelectedSubject(e.target.value)
-  }
-  className="w-full border rounded-xl p-3"
->
-
-  <option value="Free">
-    Free Period
-  </option>
-
-  {subjects.map((subject) => (
-
-    <option
-      key={subject.name}
-      value={subject.name}
-    >
-      {subject.name}
-    </option>
-
-  ))}
-
-</select>
-
-      <div className="flex justify-end gap-3 mt-6">
-
-        <button
-          onClick={() => {
-            setEditingSlot(null);
-            setConflictMessage("");
-          }}
-          className="px-4 py-2 border rounded-xl"
-        >
-          Cancel
-        </button>
-
-        <button
-          onClick={() => {
-            // Check for conflicts
-            if (selectedSubject !== "Free") {
-              const selected = subjects.find((s) => s.name === selectedSubject);
-              const dayIndex = Object.keys(generatedTimetable).indexOf(editingSlot.day);
-              const slotsInPeriod = generatedTimetable[editingSlot.day];
-              
-              // Check if this faculty is already assigned in this period (excluding current slot)
-              let hasConflict = false;
-              for (let i = 0; i < slotsInPeriod.length; i++) {
-                if (i !== editingSlot.periodIndex) {
-                  const slot = slotsInPeriod[i];
-                  if (slot && slot.faculty === selected.faculty) {
-                    hasConflict = true;
-                    break;
-                  }
-                }
-              }
-              
-              if (hasConflict) {
-                setConflictMessage(`${selected.faculty} is already assigned during this period.`);
-                return;
-              }
-            }
-            
-            // Clear conflict message if no conflict
-            setConflictMessage("");
-            
-            const updated = {
-              ...generatedTimetable,
-            };
-
-            if (selectedSubject === "Free") {
-              updated[editingSlot.day][editingSlot.periodIndex] = null;
-            } else {
-              const selected = subjects.find((s) => s.name === selectedSubject);
-              updated[editingSlot.day][editingSlot.periodIndex] = {
-                subject: selected.name,
-                faculty: selected.faculty,
-              };
-            }
-
-            setGeneratedTimetable(updated);
-
-            setEditingSlot(null);
-          }}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] text-white"
-        >
-          Save
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-)}
     </div>
   );
 }
-
 
 export default TimetableGenerator;
