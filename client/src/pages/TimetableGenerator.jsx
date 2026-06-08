@@ -93,7 +93,7 @@ function TimetableGenerator() {
   ];
 
   const [generatedTimetable, setGeneratedTimetable] =
-    useState(null);
+  useState(null);
 
   const [editingSlot, setEditingSlot] =
   useState(null);
@@ -127,21 +127,59 @@ const [currentVersion, setCurrentVersion] =
   const [conflictMessage, setConflictMessage] = useState("");
 
   const checkFacultyConflict = (facultyName, dayIndex, periodIndex) => {
-    const slotsInPeriod = generatedTimetable[Object.keys(generatedTimetable)[dayIndex]];
-    if (!slotsInPeriod) return false;
-    
-    const slot = slotsInPeriod[periodIndex];
-    if (slot && slot.faculty === facultyName) {
-      return true;
-    }
-    
-    return false;
-  };
+  if (!generatedTimetable) return false;
 
-  const handleGenerate = () => {
+  const slotsInPeriod =
+    generatedTimetable[
+      Object.keys(generatedTimetable)[dayIndex]
+    ];
+
+  if (!slotsInPeriod) return false;
+
+  const slot = slotsInPeriod[periodIndex];
+
+  if (slot && slot.faculty === facultyName) {
+    return true;
+  }
+
+  return false;
+};
+
+const facultyList = [
+  "Dr Rao",
+  "Dr Sharma",
+  "Dr Patel",
+  "Dr Kumar",
+];
+
+const sectionList = [
+  "CSE-A",
+  "CSE-B",
+  "CSE-C",
+];
+
+const [selectedFaculty, setSelectedFaculty] =
+  useState(facultyList);
+
+const [selectedSections, setSelectedSections] =
+  useState(sectionList);
+
+
+
+
+
+
+const handleGenerate = () => {
+
+  const filteredSubjects =
+    subjects.filter((subject) =>
+      selectedFaculty.includes(
+        subject.faculty
+      )
+    );
 
   const result = generateSchedule(
-    subjects,
+    filteredSubjects,
     workingDays,
     periodsPerDay,
     allowFreePeriods,
@@ -265,12 +303,173 @@ const [currentVersion, setCurrentVersion] =
 
           </div>
 
-          <button
-            onClick={handleGenerate}
-            className="mt-8 px-6 py-3 rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] text-white font-semibold hover:shadow-lg transition-all"
-          >
-            Generate Timetable
-          </button>
+         <div className="mt-6">
+
+  <label className="block mb-3 font-medium text-zinc-900">
+    Faculty Selection
+  </label>
+
+  <div className="flex gap-2 mb-4">
+
+    <button
+      type="button"
+      onClick={() =>
+        setSelectedFaculty(
+          facultyList
+        )
+      }
+      className="px-3 py-2 rounded-lg bg-gray-100"
+    >
+      Select All
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setSelectedFaculty([])
+      }
+      className="px-3 py-2 rounded-lg bg-gray-100"
+    >
+      Clear All
+    </button>
+
+  </div>
+
+  <div className="grid grid-cols-2 gap-2 mb-6">
+
+    {facultyList.map((faculty) => (
+
+      <label
+        key={faculty}
+        className="flex items-center gap-2"
+      >
+
+        <input
+          type="checkbox"
+          checked={selectedFaculty.includes(
+            faculty
+          )}
+          onChange={() => {
+
+            if (
+              selectedFaculty.includes(
+                faculty
+              )
+            ) {
+
+              setSelectedFaculty(
+                selectedFaculty.filter(
+                  (f) => f !== faculty
+                )
+              );
+
+            } else {
+
+              setSelectedFaculty([
+                ...selectedFaculty,
+                faculty,
+              ]);
+
+            }
+
+          }}
+        />
+
+        {faculty}
+
+      </label>
+
+    ))}
+
+  </div>
+<div className="mt-6">
+
+  <label className="block mb-3 font-medium text-zinc-900">
+    Section Selection
+  </label>
+
+  <div className="flex gap-2 mb-4">
+
+    <button
+      type="button"
+      onClick={() =>
+        setSelectedSections(sectionList)
+      }
+      className="px-3 py-2 rounded-lg bg-gray-100"
+    >
+      Select All
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setSelectedSections([])
+      }
+      className="px-3 py-2 rounded-lg bg-gray-100"
+    >
+      Clear All
+    </button>
+
+  </div>
+
+  <div className="grid grid-cols-2 gap-2">
+
+    {sectionList.map((section) => (
+
+      <label
+        key={section}
+        className="flex items-center gap-2"
+      >
+
+        <input
+          type="checkbox"
+          checked={selectedSections.includes(
+            section
+          )}
+          onChange={() => {
+
+            if (
+              selectedSections.includes(
+                section
+              )
+            ) {
+
+              setSelectedSections(
+                selectedSections.filter(
+                  (s) => s !== section
+                )
+              );
+
+            } else {
+
+              setSelectedSections([
+                ...selectedSections,
+                section,
+              ]);
+
+            }
+
+          }}
+        />
+
+        {section}
+
+      </label>
+
+    ))}
+
+  </div>
+
+</div>
+  <button
+  
+    onClick={handleGenerate}
+    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] text-white font-semibold hover:shadow-lg transition-all"
+  >
+    Generate Timetable
+  </button>
+
+</div>
 
         </div>
 
@@ -336,6 +535,7 @@ const [currentVersion, setCurrentVersion] =
                 </div>
               </div>
             )}
+                
 
             <table className="w-full border-collapse">
 
@@ -366,8 +566,8 @@ const [currentVersion, setCurrentVersion] =
               <tbody>
 
                 {Object.entries(
-                  generatedTimetable
-                ).map(([day, periods]) => (
+  generatedTimetable
+).map(([day, periods]) => (
 
                   <tr
                     key={day}
@@ -434,11 +634,11 @@ const [currentVersion, setCurrentVersion] =
 
               </tbody>
 
-            </table>
+              </table>
 
           </div>
 
-        )}
+              )}
 
       </div>
       {editingSlot && (
@@ -565,5 +765,6 @@ const [currentVersion, setCurrentVersion] =
     </div>
   );
 }
+
 
 export default TimetableGenerator;
