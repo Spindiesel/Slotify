@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 function Sections() {
+  const { bg, text, border, input } = useTheme();
   const [sectionName, setSectionName] =
     useState("");
 
@@ -39,19 +41,20 @@ function Sections() {
   };
 
   return (
-    <div className="flex-1 bg-gray-50 p-8">
+    <div className={`w-full overflow-auto ${bg.page}`}>
+      <div className="w-full p-4 sm:p-6 lg:p-8">
 
-      <h1 className="text-4xl font-bold text-black mb-2">
+      <h1 className={`mb-2 text-3xl font-bold sm:text-4xl ${text.primary}`}>
         Sections Management
       </h1>
 
-      <p className="text-gray-600 mb-8">
+      <p className={`${text.secondary} mb-8 text-sm sm:text-base font-medium`}>
         Manage academic sections.
       </p>
 
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200 mb-8">
+      <div className={`${bg.card} ${border} mb-8 rounded-3xl border p-6 shadow-sm`}>
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <h2 className={`mb-6 text-2xl font-semibold ${text.primary}`}>
           Add Section
         </h2>
 
@@ -64,7 +67,7 @@ function Sections() {
             onChange={(e) =>
               setSectionName(e.target.value)
             }
-            className="flex-1 border border-gray-300 rounded-xl p-3"
+            className={`flex-1 rounded-xl border p-3 ${input}`}
           />
 
           <button
@@ -78,9 +81,9 @@ function Sections() {
 
       </div>
 
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
+      <div className={`${bg.card} ${border} rounded-3xl border p-6 shadow-sm`}>
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <h2 className={`mb-6 text-2xl font-semibold ${text.primary}`}>
           Sections
         </h2>
 
@@ -90,11 +93,11 @@ function Sections() {
 
             <tr className="border-b">
 
-              <th className="text-left p-3 font-semibold text-gray-900">
+              <th className="p-3 text-left font-semibold text-black">
                 Section
               </th>
 
-              <th className="text-right p-3 font-semibold text-gray-900">
+              <th className="p-3 text-right font-semibold text-black">
                 Actions
               </th>
 
@@ -111,7 +114,7 @@ function Sections() {
                 className="border-b"
               >
 
-                <td className="p-3 text-gray-900 font-medium">
+                <td className="p-3 font-medium text-zinc-900">
                   {section.name}
                 </td>
 
@@ -140,6 +143,7 @@ function Sections() {
 
       </div>
 
+      </div>
     </div>
   );
 }

@@ -27,8 +27,8 @@ export const ThemeProvider = ({ children }) => {
       },
       text: {
         primary: "text-black",
-        secondary: "text-gray-600",
-        tertiary: "text-gray-500",
+        secondary: "text-zinc-900",
+        tertiary: "text-zinc-700",
       },
       border: "border-gray-200",
       input: "bg-white text-black border-gray-300",
@@ -44,8 +44,8 @@ export const ThemeProvider = ({ children }) => {
       },
       text: {
         primary: "text-white",
-        secondary: "text-gray-300",
-        tertiary: "text-gray-400",
+        secondary: "text-gray-100",
+        tertiary: "text-gray-200",
       },
       border: "border-gray-700",
       input: "bg-gray-700 text-white border-gray-600",

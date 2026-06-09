@@ -14,7 +14,7 @@ function DashboardCard({ title, value, icon, growth = "+2" }) {
 
 
       {/* Title */}
-      <p className="text-zinc-600 font-medium mb-4 text-sm sm:text-base">
+      <p className="text-black font-semibold mb-4 text-sm sm:text-base">
         {title}
       </p>
 
@@ -22,7 +22,7 @@ function DashboardCard({ title, value, icon, growth = "+2" }) {
       {/* Growth Indicator */}
       <div className="flex items-center gap-2">
         <span className="text-[#FF0436] font-semibold text-sm">{growth}</span>
-        <span className="text-zinc-500 text-xs sm:text-sm">this month</span>
+        <span className="text-zinc-800 font-medium text-xs sm:text-sm">this month</span>
       </div>
     </div>
   );

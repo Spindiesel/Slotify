@@ -22,7 +22,7 @@ function Settings() {
         Settings
       </h1>
 
-      <p className={`${text.secondary} mb-8`}>
+      <p className={`${text.secondary} mb-8 font-medium`}>
         Customize your Slotify experience.
       </p>
 

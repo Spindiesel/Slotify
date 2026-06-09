@@ -757,7 +757,7 @@ function TimetableGenerator() {
           Timetable Generator
         </h1>
 
-        <p className="mb-8 text-sm text-zinc-600 sm:text-base">
+        <p className="mb-8 text-sm font-medium text-zinc-900 sm:text-base">
           Generate smart academic timetables.
         </p>
 
@@ -957,7 +957,7 @@ function TimetableGenerator() {
 
               <button
                 onClick={() => openSavedTimetablesModal("load")}
-                className="rounded-xl bg-gray-100 px-4 py-2 font-semibold text-gray-700 transition-all hover:bg-gray-200"
+                className="rounded-xl bg-gray-100 px-4 py-2 font-semibold text-zinc-900 transition-all hover:bg-gray-200"
               >
                 Load Timetable
               </button>
@@ -995,8 +995,8 @@ function TimetableGenerator() {
                   }}
                   className={`rounded-xl px-4 py-2 font-semibold transition-all ${
                     swapMode
-                      ? "bg-green-50 text-green-600 hover:bg-green-100"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-green-50 text-green-700 hover:bg-green-100"
+                      : "bg-gray-100 text-zinc-900 hover:bg-gray-200"
                   }`}
                 >
                   {swapMode ? "Swap Mode ON" : "Swap Mode OFF"}
@@ -1025,7 +1025,7 @@ function TimetableGenerator() {
 
                 <button
                   onClick={() => openSavedTimetablesModal("load")}
-                  className="rounded-xl bg-gray-100 px-4 py-2 font-semibold text-gray-700 transition-all hover:bg-gray-200"
+                  className="rounded-xl bg-gray-100 px-4 py-2 font-semibold text-zinc-900 transition-all hover:bg-gray-200"
                 >
                   Load Timetable
                 </button>
@@ -1066,7 +1066,7 @@ function TimetableGenerator() {
                       className={`rounded-xl px-4 py-2 font-medium transition-all ${
                         currentVersion === version.id
                           ? "bg-[#FF0436] text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          : "bg-gray-100 text-zinc-900 hover:bg-gray-200"
                       }`}
                     >
                       {version.name}
@@ -1145,7 +1145,7 @@ function TimetableGenerator() {
                                       <div className="font-medium text-black">
                                         {period.subject}
                                       </div>
-                                      <div className="text-xs text-gray-500">
+                                      <div className="text-xs font-medium text-zinc-900">
                                         {period.faculty}
                                       </div>
                                     </div>
@@ -1172,8 +1172,8 @@ function TimetableGenerator() {
               Edit Timetable Slot
             </h2>
 
-            <p className="mb-2 text-gray-600">{editingSlot.section}</p>
-            <p className="mb-4 text-gray-600">
+            <p className="mb-2 font-medium text-zinc-900">{editingSlot.section}</p>
+            <p className="mb-4 font-medium text-zinc-900">
               {editingSlot.day} - P{editingSlot.periodIndex + 1}
             </p>
 
@@ -1232,7 +1232,7 @@ function TimetableGenerator() {
                     ? "Load Timetable"
                     : "Delete Timetable"}
                 </h2>
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 text-sm font-medium text-zinc-900">
                   Saved Timetables: {savedTimetables.length}
                 </p>
               </div>
@@ -1247,7 +1247,7 @@ function TimetableGenerator() {
 
             <div className="space-y-3">
               {savedTimetables.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-gray-300 p-6 text-center text-gray-500">
+                <div className="rounded-2xl border border-dashed border-gray-300 p-6 text-center font-medium text-zinc-900">
                   No saved timetables found.
                 </div>
               ) : (
@@ -1274,7 +1274,7 @@ function TimetableGenerator() {
                     <p className="mt-1 text-sm text-gray-700">
                       {savedTimetable.name}
                     </p>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs font-medium text-zinc-900">
                       {new Date(savedTimetable.createdAt).toLocaleString()}
                     </p>
                   </button>

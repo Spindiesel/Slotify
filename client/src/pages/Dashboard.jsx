@@ -95,7 +95,7 @@ function Dashboard() {
                 {recentActivities.map((activity, index) => (
                   <div
                     key={activity.id}
-                    className={`flex items-start gap-3 sm:gap-4 py-4 sm:py-5 px-3 sm:px-4 rounded-2xl transition-all hover:opacity-75 ${
+                    className={`flex items-start gap-3 sm:gap-4 py-4 sm:py-5 px-3 sm:px-4 rounded-2xl transition-all hover:bg-gray-50 ${
                       index !== recentActivities.length - 1 ? `border-b ${border}` : ""
                     }`}
                   >
@@ -114,7 +114,7 @@ function Dashboard() {
                           <p className={`${text.primary} font-semibold text-sm sm:text-base break-words`}>
                             {activity.message}
                           </p>
-                          <p className={`${text.tertiary} text-xs sm:text-sm mt-1`}>
+                          <p className={`${text.tertiary} text-xs sm:text-sm mt-1 font-medium`}>
                             {activity.timestamp}
                           </p>
                         </div>

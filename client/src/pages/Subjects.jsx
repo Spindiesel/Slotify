@@ -5,7 +5,7 @@ import SubjectsTable from "../components/SubjectsTable";
 import AddSubjectModal from "../components/AddSubjectModal";
 
 function Subjects() {
-  const { bg, text, border } = useTheme();
+  const { bg, text } = useTheme();
 
   const [showModal, setShowModal] = useState(false);
 
@@ -49,23 +49,24 @@ function Subjects() {
 };
 
   return (
-    <div className="flex-1 bg-gray-50 p-8">
+    <div className={`w-full overflow-auto ${bg.page}`}>
+      <div className="w-full p-4 sm:p-6 lg:p-8">
 
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
 
         <div>
-          <h1 className="text-4xl font-bold text-black">
+          <h1 className={`text-3xl font-bold sm:text-4xl ${text.primary}`}>
             Subject Management
           </h1>
 
-          <p className="text-gray-600 mt-2">
+          <p className={`${text.secondary} mt-2 text-sm sm:text-base font-medium`}>
             Manage all academic subjects.
           </p>
         </div>
 
         <button
           onClick={() => setShowModal(true)}
-          className="px-5 py-3 rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] text-white font-medium"
+          className="whitespace-nowrap rounded-xl bg-gradient-to-r from-[#FF4E6B] to-[#FF0436] px-5 py-3 font-medium text-white"
         >
           + Add Subject
         </button>
@@ -84,6 +85,7 @@ function Subjects() {
         />
       )}
 
+      </div>
     </div>
   );
 }

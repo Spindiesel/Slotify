@@ -22,11 +22,14 @@ function AddRoomModal({ onClose, onAdd }) {
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
       <div className="bg-white rounded-3xl p-8 w-full max-w-md">
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <h2 className="text-2xl font-bold text-black mb-6">
           Add Room
         </h2>
 
         <div className="space-y-4">
+          <label className="block font-medium text-zinc-900">
+            Room Number
+          </label>
 
           <input
             type="text"
@@ -35,6 +38,10 @@ function AddRoomModal({ onClose, onAdd }) {
             onChange={(e) => setRoomNumber(e.target.value)}
             className="w-full border rounded-xl p-3"
           />
+
+          <label className="block font-medium text-zinc-900">
+            Room Type
+          </label>
 
           <select
             value={type}
@@ -45,6 +52,10 @@ function AddRoomModal({ onClose, onAdd }) {
             <option>Classroom</option>
             <option>Laboratory</option>
           </select>
+
+          <label className="block font-medium text-zinc-900">
+            Capacity
+          </label>
 
           <input
             type="number"

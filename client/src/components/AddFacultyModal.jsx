@@ -25,11 +25,14 @@ function AddFacultyModal({ onClose, onAdd }) {
 
       <div className="bg-white rounded-3xl p-8 w-full max-w-md">
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <h2 className="text-2xl font-bold text-black mb-6">
           Add Faculty
         </h2>
 
         <div className="space-y-4">
+          <label className="block font-medium text-zinc-900">
+            Faculty Name
+          </label>
 
           <input
             type="text"
@@ -39,6 +42,10 @@ function AddFacultyModal({ onClose, onAdd }) {
             className="w-full border rounded-xl p-3"
           />
 
+          <label className="block font-medium text-zinc-900">
+            Department
+          </label>
+
           <input
             type="text"
             placeholder="Department"
@@ -46,6 +53,10 @@ function AddFacultyModal({ onClose, onAdd }) {
             onChange={(e) => setDepartment(e.target.value)}
             className="w-full border rounded-xl p-3"
           />
+
+          <label className="block font-medium text-zinc-900">
+            Subjects
+          </label>
 
           <input
             type="text"
