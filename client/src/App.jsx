@@ -17,13 +17,13 @@ function AppContent() {
   const { bg } = useTheme();
 
   return (
-    <div className={`flex h-screen w-full overflow-hidden ${bg.page}`}>
+    <div className={`flex min-h-screen w-full overflow-hidden ${bg.page}`}>
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-      
-      <div className="flex flex-col flex-1 w-full h-screen overflow-hidden">
+
+      <div className="flex w-full min-h-screen flex-1 flex-col overflow-hidden">
         <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        
-        <main className="flex-1 w-full h-full overflow-auto">
+
+        <main className="flex-1 w-full overflow-auto">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/faculty" element={<Faculty />} />

@@ -20,13 +20,12 @@ function Rooms() {
       type: "Laboratory",
       capacity: 30,
     },
-
     {
       id: 3,
       roomNumber: "102",
       type: "Classroom",
       capacity: 60,
-    }
+    },
   ]);
 
   const addRoom = (newRoom) => {
