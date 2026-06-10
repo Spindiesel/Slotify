@@ -1,4 +1,5 @@
 import { useState } from "react";
+import {useEffect} from "react";
 
 function AddFacultyModal({ onClose, onAdd }) {
 
@@ -6,19 +7,30 @@ function AddFacultyModal({ onClose, onAdd }) {
   const [department, setDepartment] = useState("");
   const [subjects, setSubjects] = useState("");
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!name || !department || !subjects) return;
+  const response = await fetch(
+    "http://localhost:5000/api/faculty",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        department,
+        subjects,
+      }),
+    }
+  );
 
-    onAdd({
-      id: Date.now(),
-      name,
-      department,
-      subjects,
-    });
+  const savedFaculty = await response.json();
 
-    onClose();
-  };
+  onAdd(savedFaculty);
+
+  onClose();
+};
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
@@ -55,7 +67,7 @@ function AddFacultyModal({ onClose, onAdd }) {
           />
 
           <label className="block font-medium text-zinc-900">
-            Subjects
+            Subject
           </label>
 
           <input

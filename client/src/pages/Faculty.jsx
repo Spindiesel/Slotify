@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 
 import FacultyTable from "../components/FacultyTable";
@@ -8,33 +9,33 @@ function Faculty() {
   const { bg, text, border } = useTheme();
 
   const [showModal, setShowModal] = useState(false);
+  const [faculty, setFaculty] = useState([]);
 
-  const [faculty, setFaculty] = useState([
-    {
-      id: 1,
-      name: "Dr Rao",
-      department: "CSE",
-      subjects: "DBMS, CN",
-    },
-    {
-      id: 2,
-      name: "Dr Sharma",
-      department: "CSE",
-      subjects: "Operating Systems",
-    },
-  ]);
+  useEffect(() => {
+  fetch("http://localhost:5000/api/faculty")
+    .then((res) => res.json())
+    .then((data) => setFaculty(data))
+    .catch((err) => console.error(err));
+}, []);
 
   const addFaculty = (newFaculty) => {
     setFaculty([...faculty, newFaculty]);
   };
 
- const deleteFaculty = (id) => {
+ const deleteFaculty = async (id) => {
 
   const confirmDelete = window.confirm(
     "Are you sure you want to delete this faculty member from the pool?"
   );
 
   if (!confirmDelete) return;
+
+  await fetch(
+    `http://localhost:5000/api/faculty/${id}`,
+    {
+      method: "DELETE",
+    }
+  );
 
   setFaculty(
     faculty.filter((item) => item.id !== id)

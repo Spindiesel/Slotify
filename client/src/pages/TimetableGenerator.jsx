@@ -397,9 +397,15 @@ function TimetableGenerator() {
       faculty: "Dr Kumar",
       hoursPerWeek: 4,
     },
+
+    {
+      name:"Data Strctures",
+      faculty:"Dr Noobday",
+      hoursPerWeek:2,
+    }
   ];
 
-  const facultyList = ["Dr Rao", "Dr Sharma", "Dr Patel", "Dr Kumar"];
+  const facultyList = ["Dr Rao", "Dr Sharma", "Dr Patel", "Dr Kumar","Dr Noobday"];
   const sectionList = ["CSE-A", "CSE-B", "CSE-C"];
 
   const [generatedTimetables, setGeneratedTimetables] = useState({});
