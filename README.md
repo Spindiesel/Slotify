@@ -2,6 +2,15 @@ Slotify
 
 Slotify is a modern web-based timetable generation and management system designed to simplify academic scheduling for educational institutions. The platform enables administrators to efficiently manage faculty members, academic subjects, classrooms, and timetable-related data through an intuitive dashboard interface. Built with React and Tailwind CSS, Slotify focuses on providing a clean user experience while reducing the complexity of manual timetable management. The system is being developed to support automated timetable generation, conflict prevention, resource allocation, and schedule optimization, making academic scheduling faster, more organized, and error-free.
 
+
+
+⚠️⚠️ Turning off Backend Will RESULT IN LOSING THE DATA ⚠️⚠️ 
+The Data Is stored in Local Ram as a form of text 
+
+
+
+
+
 ## Features
 
 ### Faculty Management
