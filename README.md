@@ -4,8 +4,7 @@ Slotify is a modern web-based timetable generation and management system designe
 
 
 
-⚠️⚠️ Turning off Backend Will RESULT IN LOSING THE DATA ⚠️⚠️ 
-The Data Is stored in Local Ram as a form of text 
+
 
 
 
